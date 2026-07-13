@@ -5,15 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="/frontend/css/style.css">
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-success">
-            <div class="container">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container justify-content-center">
 
                 <!-- Logo -->
-                <a class="navbar-brand fw-bold" href="#">
-                    RECETA FACIL
+                <a class="navbar-brand d-flex align-items-center fw-bold" href="index.html">
+                    <img src="/frontend/assets/logo-recetario.png" alt="Logo" width="100" height="100" class="d-inline-block align-text-top"> Mi Recetario
                 </a>
 
                 <!-- Botón para móviles -->
@@ -35,18 +36,18 @@
         <div class="row m-4">
             <div class="col-lg-3">
                 <h3>Categorías</h3>
-                <div class="btn btn bg-primary w-100" id="categoria-todo">Todos los platillos</div>
-                <div class="btn btn bg-none w-100">Platos con carne</div>
-                <div class="btn btn bg-none w-100">Platos con pollo</div>
-                <div class="btn btn bg-none w-100">Postres</div>
-                <div class="btn btn bg-none w-100">Pasta/Fideos</div>
-                <div class="btn btn bg-none w-100">Tarta y Empanada</div>
-                <div class="btn btn bg-none w-100">Mariscos y Pescados</div>
-                <div class="btn btn bg-none w-100">Entradas</div>
-                <div class="btn btn bg-none w-100">Desayunos</div>
-                <div class="btn btn bg-none w-100">Comida vegana</div>
-                <div class="btn btn bg-none w-100">Comida vegetariana</div>
-                <div class="btn btn bg-none w-100">Mas recetas</div>
+                <div class="btn w-100" id="categoria-todo">Todos los platillos</div>
+                <div class="btn w-100">Platos con carne</div>
+                <div class="btn w-100">Platos con pollo</div>
+                <div class="btn w-100">Postres</div>
+                <div class="btn w-100">Pasta/Fideos</div>
+                <div class="btn w-100">Tarta y Empanada</div>
+                <div class="btn w-100">Mariscos y Pescados</div>
+                <div class="btn w-100">Entradas</div>
+                <div class="btn w-100">Desayunos</div>
+                <div class="btn w-100">Comida vegana</div>
+                <div class="btn w-100">Comida vegetariana</div>
+                <div class="btn w-100">Mas recetas</div>
             </div>
             <div class="col-lg-9">
                 <h4 id="nombre-categoria"></h4>

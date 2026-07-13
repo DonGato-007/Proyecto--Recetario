@@ -1,0 +1,134 @@
+/* ===========================
+   PALETA
+   Beige: #E8D8C3
+   Crema: #F8F4EE
+   Marrón: #6D4C41
+   =========================== */
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    background: #F8F4EE;
+    color: #6D4C41;
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* ===========================
+   NAVBAR
+   =========================== */
+
+.navbar{
+    background: #E8D8C3;
+    box-shadow: 0 3px 10px rgba(0,0,0,.08);
+}
+
+.navbar-brand img{
+    transition: .3s;
+}
+
+.navbar-brand img:hover{
+    transform: scale(1.05);
+}
+
+.form-control{
+    border: 2px solid #D7B899;
+    border-radius: 30px;
+}
+
+.form-control:focus{
+    border-color: #B08A63;
+    box-shadow: 0 0 8px rgba(176,138,99,.3);
+}
+
+/* ===========================
+   CATEGORÍAS
+   =========================== */
+
+h3{
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #6D4C41;
+}
+
+.btn{
+    width: 100%;
+    text-align: left;
+    margin-bottom: 8px;
+    padding: 12px 15px;
+    border-radius: 10px;
+    background: transparent;
+    border: none;
+    color: #6D4C41;
+    transition: .25s;
+    font-weight: 500;
+}
+
+/* Hover */
+
+.btn:hover{
+    background: #D7B899;
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Botón activo */
+
+#categoria-todo{
+    background: #B08A63;
+    color: white;
+}
+
+/* ===========================
+   CONTENIDO
+   =========================== */
+
+#nombre-categoria{
+    color: #6D4C41;
+    font-weight: bold;
+    margin-bottom: 20px;
+    border-bottom: 3px solid #D7B899;
+    display: inline-block;
+    padding-bottom: 8px;
+}
+
+/* ===========================
+   FOOTER
+   =========================== */
+
+footer{
+    background: #6D4C41 !important;
+}
+
+footer h5{
+    color: #F8F4EE;
+    font-weight: bold;
+}
+
+footer p{
+    color: #E8D8C3;
+}
+
+footer hr{
+    border-color: rgba(255,255,255,.2);
+}
+
+/* ===========================
+   RESPONSIVE
+   =========================== */
+
+@media (max-width:992px){
+
+    .form-control{
+        width: 100% !important;
+        margin-top: 15px;
+    }
+
+    .col-lg-3{
+        margin-bottom: 30px;
+    }
+
+}
