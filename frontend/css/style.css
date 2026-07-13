@@ -30,6 +30,14 @@ body{
     transition: .3s;
 }
 
+.texto-recetario {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2rem;
+    color: #6D4C41;
+    letter-spacing: 1px;
+    line-height: 1;
+}
+
 .navbar-brand img:hover{
     transform: scale(1.05);
 }
