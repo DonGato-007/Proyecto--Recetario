@@ -6,8 +6,52 @@
     <title>Document</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="/frontend/css/style.css">
+    <link rel="stylesheet" href="/frontend/css/login.css">
 </head>
 <body>
+
+<div id="login-screen" class="login-overlay">
+
+    <div class="login-card">
+
+        <img src="/frontend/assets/logo-recetario.png" width="120">
+
+        <h2>Mi Recetario</h2>
+
+        <p>Inicia sesión para continuar</p>
+
+        <form id="loginForm">
+
+            <div class="mb-3">
+                <input
+                    type="email"
+                    class="form-control"
+                    placeholder="Correo electrónico"
+                    required>
+            </div>
+
+            <div class="mb-4">
+                <input
+                    type="password"
+                    class="form-control"
+                    placeholder="Contraseña"
+                    required>
+            </div>
+
+            <button class="btn-login w-100">
+                Iniciar sesión
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+
+
     <header>
         <nav class="navbar navbar-expand-lg">
             <div class="container justify-content-center">
@@ -33,6 +77,15 @@
     </header>
 
     <main>
+
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Bienvenido a Mi Recetario</h1>
+                <p>Descubre las mejores recetas para cada ocasión.</p>
+            </div>
+        </section>
+
+
         <div class="row m-4">
             <div class="col-lg-3">
                 <h3>Categorías</h3>
@@ -50,48 +103,51 @@
                 <div class="btn w-100">Mas recetas</div>
             </div>
             <div class="col-lg-9">
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Bienvenido a Mi Recetario</h1>
-            <p>Descubre las mejores recetas para cada ocasión.</p>
-        </div>
-    </section>
-</div>
+                <h3 id="nombre-categoria">Todos los platillos</h3>
+            </div>
         </div>
     </main>
 
-    <footer class="bg-dark text-white text-center py-4 mt-5">
-        <div class="container">
+    <footer class="footer-custom mt-5">
+        <div class="container py-5">
 
-            <div class="row">
-                <div class="col-lg-6">
-                    <h5>RECETA FACIL</h5>
+            <div class="row align-items-start gy-4">
 
-                    <p class="mb-2">
-                        Sistema desarrollado por los alumnos de la carrera de Desarrollo de Sistemas e Informacion
-                    </p>
-
-                </div>
-                <div class="col-lg-6">
-                    <p class="mb-2">
-                        Integrantes del grupo:
-                    </p>
-
-                    <div class="mb-0">
-                        <p>Yordi Alberth Choqque Quispe</p>
-                        <p>Marco Antonio Benavente Mamani</p>
-                        <p>Alexander Cancapac Cuchama</p>
-                        <p>Gladiz Chino Meza</p>
-                        <p>Luz Danny Arias Huillca</p>
+                <!-- Columna Logo + Descripción -->
+                <div class="col-lg-5 text-center text-lg-start">
+                    <div class="footer-brand mb-3">
+                        <img src="assets/logo-recetario.png" alt="Logo Recetario" width="80" height="80" class="footer-logo">
+                        <span class="footer-titulo">Mi Recetario</span>
                     </div>
-
+                    <p class="footer-desc">
+                        Sistema desarrollado por los alumnos de la carrera de<br>
+                        <strong>Desarrollo de Sistemas e Información</strong>
+                    </p>
                 </div>
+
+                <!-- Divisor vertical -->
+                <div class="col-lg-1 d-none d-lg-flex justify-content-center">
+                    <div class="footer-divider-v"></div>
+                </div>
+
+                <!-- Columna Integrantes -->
+                <div class="col-lg-6 text-center text-lg-start">
+                    <h6 class="footer-subtitulo">🍴 Integrantes del grupo</h6>
+                    <ul class="footer-lista">
+                        <li>✦ Yordi Alberth Choqque Quispe</li>
+                        <li>✦ Marco Antonio Benavente Mamani</li>
+                        <li>✦ Alexander Cancapac Cuchama</li>
+                        <li>✦ Gladiz Chino Meza</li>
+                        <li>✦ Luz Danny Arias Huillca</li>
+                    </ul>
+                </div>
+
             </div>
-            <hr class="my-4 border-light">
-            <div class="row">
-                <p class="mb-0">
-                    © 2026 Todos los derechos reservados.
-                </p>
+
+            <hr class="footer-hr">
+
+            <div class="text-center footer-copy">
+                © 2026 <span class="footer-titulo-sm">Mi Recetario</span> — Todos los derechos reservados.
             </div>
 
         </div>
