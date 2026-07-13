@@ -1,6 +1,9 @@
 // frontend/js/login.js
-// Maneja el login del usuario contra el módulo de Autenticación (/auth/*)
-// definido en CONTRATO_API.md.
+// Núcleo del módulo de Autenticación (/auth/*) definido en CONTRATO_API.md:
+// maneja el estado de sesión (localStorage), el login y el logout.
+//
+// Expone `window.RecetarioAuth` con lo que necesita frontend/js/auth.js
+// (el registro de usuarios) para no duplicar la lógica de sesión.
 
 (() => {
   const API_BASE_URL = "https://apigeneral-ehtt.onrender.com";
@@ -14,13 +17,14 @@
   };
 
   // Elementos del DOM
-  const loginScreen = document.getElementById("login-screen");
+  const authModalEl = document.getElementById("authModal");
   const loginForm = document.getElementById("loginForm");
   const emailInput = document.getElementById("loginEmail");
   const passwordInput = document.getElementById("loginPassword");
   const loginError = document.getElementById("loginError");
   const loginBtn = document.getElementById("loginBtn");
 
+  const loginNavBtn = document.getElementById("loginNavBtn");
   const userInfo = document.getElementById("userInfo");
   const userNombre = document.getElementById("userNombre");
   const logoutBtn = document.getElementById("logoutBtn");
@@ -44,17 +48,25 @@
 
   // ---------- UI ----------
 
-  function mostrarPantallaLogin() {
-    if (loginScreen) loginScreen.classList.remove("oculto");
+  // La app funciona en modo invitado: por defecto se ve el botón
+  // "Iniciar sesión" en el navbar y el modal permanece cerrado.
+  function mostrarInvitado() {
+    if (loginNavBtn) loginNavBtn.classList.remove("oculto");
     if (userInfo) userInfo.classList.add("oculto");
   }
 
-  function ocultarPantallaLogin(nombre, email) {
-    if (loginScreen) loginScreen.classList.add("oculto");
+  function mostrarUsuarioLogueado(nombre, email) {
+    if (loginNavBtn) loginNavBtn.classList.add("oculto");
     if (userInfo) {
       userInfo.classList.remove("oculto");
       if (userNombre) userNombre.textContent = nombre || email || "Usuario";
     }
+  }
+
+  function cerrarModalAuth() {
+    if (!authModalEl || typeof bootstrap === "undefined") return;
+    const modal = bootstrap.Modal.getOrCreateInstance(authModalEl);
+    modal.hide();
   }
 
   function mostrarError(mensaje) {
@@ -75,7 +87,7 @@
     loginBtn.textContent = cargando ? "Ingresando..." : "Iniciar sesión";
   }
 
-  // ---------- Llamadas al API ----------
+  // ---------- Llamadas al API (según CONTRATO_API.md → Módulo de Autenticación) ----------
 
   async function loginRequest(email, password) {
     const respuesta = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -118,7 +130,7 @@
     const token = obtenerToken();
 
     if (!token) {
-      mostrarPantallaLogin();
+      mostrarInvitado();
       return;
     }
 
@@ -127,11 +139,11 @@
       // Refrescamos los datos guardados por si cambiaron en el servidor
       localStorage.setItem(STORAGE_KEYS.email, datos.email || "");
       localStorage.setItem(STORAGE_KEYS.nombre, datos.nombre || "");
-      ocultarPantallaLogin(datos.nombre, datos.email);
+      mostrarUsuarioLogueado(datos.nombre, datos.email);
     } catch (error) {
-      // Token faltante, inválido o expirado -> se limpia y se pide login otra vez
+      // Token faltante, inválido o expirado -> se limpia y se vuelve a modo invitado
       limpiarSesion();
-      mostrarPantallaLogin();
+      mostrarInvitado();
     }
   }
 
@@ -152,8 +164,9 @@
     loginRequest(email, password)
       .then((datos) => {
         guardarSesion(datos);
-        ocultarPantallaLogin(datos.nombre, datos.email);
+        mostrarUsuarioLogueado(datos.nombre, datos.email);
         loginForm.reset();
+        cerrarModalAuth();
       })
       .catch((error) => {
         mostrarError(error.message);
@@ -165,7 +178,7 @@
 
   function manejarLogout() {
     limpiarSesion();
-    mostrarPantallaLogin();
+    mostrarInvitado();
   }
 
   // ---------- Inicialización ----------
@@ -180,4 +193,17 @@
 
   // El script se carga al final del <body>, así que el DOM ya existe.
   verificarSesionAlCargar();
+
+  // ---------- API compartida con frontend/js/auth.js (registro) ----------
+  // Se reutiliza toda la lógica de sesión para no duplicar código entre
+  // login y registro, ya que ambos pertenecen al mismo módulo de Autenticación.
+  window.RecetarioAuth = {
+    API_BASE_URL,
+    STORAGE_KEYS,
+    guardarSesion,
+    obtenerToken,
+    limpiarSesion,
+    mostrarUsuarioLogueado,
+    cerrarModalAuth,
+  };
 })();
