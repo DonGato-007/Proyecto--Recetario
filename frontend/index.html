@@ -22,8 +22,12 @@
 
         <form id="loginForm">
 
+            <div id="loginError" class="alert alert-danger py-2 oculto" role="alert"></div>
+
             <div class="mb-3">
                 <input
+                    id="loginEmail"
+                    name="email"
                     type="email"
                     class="form-control"
                     placeholder="Correo electrónico"
@@ -32,13 +36,15 @@
 
             <div class="mb-4">
                 <input
+                    id="loginPassword"
+                    name="password"
                     type="password"
                     class="form-control"
                     placeholder="Contraseña"
                     required>
             </div>
 
-            <button class="btn-login w-100">
+            <button id="loginBtn" type="submit" class="btn-login w-100">
                 Iniciar sesión
             </button>
 
@@ -70,6 +76,11 @@
 
                 <div class="collapse navbar-collapse" id="menu">
                     <input type="text" class="form-control w-75 ms-auto" placeholder="Buscar receta..." aria-label="Buscar receta...">
+
+                    <div id="userInfo" class="d-flex align-items-center ms-3 oculto">
+                        <span id="userNombre" class="me-2 fw-bold"></span>
+                        <button id="logoutBtn" type="button" class="btn btn-sm btn-outline-secondary">Cerrar sesión</button>
+                    </div>
                 </div>
 
             </div>
@@ -161,5 +172,6 @@
             document.getElementById("nombre-categoria").innerText="Todos los platillos";
         });
     </script>
+    <script src="/frontend/js/login.js"></script>
 </body>
 </html>
