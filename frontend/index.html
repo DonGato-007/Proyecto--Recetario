@@ -7,8 +7,52 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
+
+<div id="login-screen" class="login-overlay">
+
+    <div class="login-card">
+
+        <img src="/frontend/assets/logo-recetario.png" width="120">
+
+        <h2>Mi Recetario</h2>
+
+        <p>Inicia sesión para continuar</p>
+
+        <form id="loginForm">
+
+            <div class="mb-3">
+                <input
+                    type="email"
+                    class="form-control"
+                    placeholder="Correo electrónico"
+                    required>
+            </div>
+
+            <div class="mb-4">
+                <input
+                    type="password"
+                    class="form-control"
+                    placeholder="Contraseña"
+                    required>
+            </div>
+
+            <button class="btn-login w-100">
+                Iniciar sesión
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+
+
     <header>
         <nav class="navbar navbar-expand-lg">
             <div class="container justify-content-center">
@@ -34,6 +78,15 @@
     </header>
 
     <main>
+
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Bienvenido a Mi Recetario</h1>
+                <p>Descubre las mejores recetas para cada ocasión.</p>
+            </div>
+        </section>
+
+
         <div class="row m-4">
             <div class="col-lg-3">
                 <h3>Categorías</h3>
@@ -51,7 +104,7 @@
                 <div class="btn w-100">Mas recetas</div>
             </div>
             <div class="col-lg-9">
-                <h4 id="nombre-categoria"></h4>
+                <h3 id="nombre-categoria">Todos los platillos</h3>
             </div>
         </div>
     </main>
