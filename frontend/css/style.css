@@ -132,3 +132,41 @@ footer hr{
     }
 
 }
+
+
+
+.hero{
+    height: 600px;
+    background-image: url("../assets/hero.jpg");
+    background-size: cover;
+    background-position: center;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.hero::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+}
+
+.hero-content{
+    position: relative;
+    color: white;
+    text-align: center;
+    z-index: 2;
+}
+
+.hero-content h1{
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+.hero-content p{
+    font-size: 1.3rem;
+}
