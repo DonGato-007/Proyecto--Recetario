@@ -1,361 +1,332 @@
-// categoria todo
-const categoriaTodo = document.getElementById("categoria-todo");
-const contenidoPlatos = document.getElementById("contenido-platos");
 
-const recetas = [
-{
-    titulo: "Lomo Saltado",
-    descripcion: "Saltear la carne junto con la cebolla, tomate y ají amarillo. Servir acompañado de papas fritas y arroz.",
-    imagen: "assets/lomo.jpg",
-    ingredientes: [
-        { nombre: "Carne de res", imagen: "assets/ingredientes/carne.jpg" },
-        { nombre: "Tomate", imagen: "assets/ingredientes/tomate.jpg" },
-        { nombre: "Cebolla", imagen: "assets/ingredientes/cebolla.jpg" },
-        { nombre: "Papa", imagen: "assets/ingredientes/papa.jpg" }
-    ]
-},
-{
-    titulo: "Arroz con Pollo",
-    descripcion: "Preparar el arroz con culantro, cocinar el pollo y servir acompañado de salsa criolla.",
-    imagen: "assets/arroz-pollo.jpg",
-    ingredientes: [
-        { nombre: "Pollo", imagen: "assets/ingredientes/pollo.jpg" },
-        { nombre: "Arroz", imagen: "assets/ingredientes/arroz.jpg" },
-        { nombre: "Culantro", imagen: "assets/ingredientes/culantro.jpg" },
-        { nombre: "Arvejas", imagen: "assets/ingredientes/arvejas.jpg" }
-    ]
-},
-{
-    titulo: "Cheesecake",
-    descripcion: "Preparar la base de galleta, agregar la mezcla de queso y refrigerar antes de servir.",
-    imagen: "assets/cheesecake.jpg",
-    ingredientes: [
-        { nombre: "Queso crema", imagen: "assets/ingredientes/queso.jpg" },
-        { nombre: "Galletas", imagen: "assets/ingredientes/galletas.jpg" },
-        { nombre: "Mantequilla", imagen: "assets/ingredientes/mantequilla.jpg" },
-        { nombre: "Frutos rojos", imagen: "assets/ingredientes/frutos.jpg" }
-    ]
-}
-];
+(() => {
+    const categoriaTodo = document.getElementById("categoria-todo");
+    const contenidoPlatos = document.getElementById("contenido-platos");
 
-categoriaTodo.addEventListener("click", () => {
+    const API_BASE = "https://www.themealdb.com/api/json/v1/1";
 
-    contenidoPlatos.innerHTML = "<h3 class='mb-4'>Todos los platillos</h3>";
+    // ---------- Mapeo: botón local -> categorías ----------
+    const MAPA_CATEGORIAS = {
+        "categoria-carne": { titulo: "Platos con carne", mealdb: ["Beef"] },
+        "categoria-pollo": { titulo: "Platos con pollo", mealdb: ["Chicken"] },
+        "categoria-postres": { titulo: "Postres", mealdb: ["Dessert"] },
+        "categoria-pasta": { titulo: "Pasta / Fideos", mealdb: ["Pasta"] },
+        "categoria-tarta": { titulo: "Tartas y Empanadas", mealdb: ["Side"] },
+        "categoria-mariscos": { titulo: "Mariscos y Pescados", mealdb: ["Seafood"] },
+        "categoria-entradas": { titulo: "Entradas", mealdb: ["Starter"] },
+        "categoria-desayunos": { titulo: "Desayunos", mealdb: ["Breakfast"] },
+        "categoria-vegana": { titulo: "Comida Vegana", mealdb: ["Vegan"] },
+        "categoria-vegetariana": { titulo: "Comida Vegetariana", mealdb: ["Vegetarian"] },
+        "categoria-mas": { titulo: "Más recetas", mealdb: ["Miscellaneous", "Pork", "Lamb", "Goat"] },
+    };
 
-    recetas.forEach((receta, index) => {
+    const LIMITE_POR_CATEGORIA_EN_TODO = 4;
 
-        contenidoPlatos.innerHTML += `
-        <div class="card mb-3 shadow-sm receta-card"
-             data-index="${index}"
+    // ---------- Caché en memoria (dura mientras la pestaña esté abierta) ----------
+    const cacheListasPorCategoria = new Map(); 
+    const cacheDetallePorId = new Map(); 
+
+    // ---------- Llamadas a TheMealDB ----------
+
+    async function obtenerListaPorCategoria(nombreMealdb) {
+        if (cacheListasPorCategoria.has(nombreMealdb)) {
+            return cacheListasPorCategoria.get(nombreMealdb);
+        }
+
+        const respuesta = await fetch(
+            `${API_BASE}/filter.php?c=${encodeURIComponent(nombreMealdb)}`
+        );
+
+        if (!respuesta.ok) {
+            throw new Error(`No se pudo cargar la categoría "${nombreMealdb}"`);
+        }
+
+        const datos = await respuesta.json();
+
+      
+        const lista = (datos.meals || []).map((meal) => ({
+            id: meal.idMeal,
+            nombre: meal.strMeal,
+            imagen: meal.strMealThumb,
+        }));
+
+        cacheListasPorCategoria.set(nombreMealdb, lista);
+        return lista;
+    }
+
+    async function obtenerDetalleReceta(idMeal) {
+        if (cacheDetallePorId.has(idMeal)) {
+            return cacheDetallePorId.get(idMeal);
+        }
+
+        const respuesta = await fetch(
+            `${API_BASE}/lookup.php?i=${encodeURIComponent(idMeal)}`
+        );
+
+        if (!respuesta.ok) {
+            throw new Error("No se pudo cargar el detalle de la receta");
+        }
+
+        const datos = await respuesta.json();
+        const meal = (datos.meals || [])[0];
+
+        if (!meal) return null;
+
+        const detalle = {
+            titulo: meal.strMeal,
+            imagen: meal.strMealThumb,
+            descripcion: meal.strInstructions,
+            ingredientes: extraerIngredientes(meal),
+        };
+
+        cacheDetallePorId.set(idMeal, detalle);
+        return detalle;
+    }
+
+    function extraerIngredientes(meal) {
+        const ingredientes = [];
+
+        for (let i = 1; i <= 20; i++) {
+            const nombre = meal[`strIngredient${i}`];
+            const medida = meal[`strMeasure${i}`];
+
+            if (!nombre || !nombre.trim()) continue;
+
+            const nombreLimpio = nombre.trim();
+            const medidaLimpia = medida ? medida.trim() : "";
+
+            ingredientes.push({
+                
+                nombre: medidaLimpia ? `${nombreLimpio} (${medidaLimpia})` : nombreLimpio,
+
+                imagen: `https://www.themealdb.com/images/ingredients/${encodeURIComponent(nombreLimpio)}-Small.png`,
+            });
+        }
+
+        return ingredientes;
+    }
+
+    // ---------- Render ----------
+
+    function mostrarCargando(titulo) {
+        contenidoPlatos.innerHTML = `
+      <h3 class="mb-4">${titulo}</h3>
+      <p class="text-muted">Cargando recetas...</p>
+    `;
+    }
+
+    function mostrarError(titulo, mensaje) {
+        contenidoPlatos.innerHTML = `
+      <h3 class="mb-4">${titulo}</h3>
+      <p class="text-danger">${mensaje}</p>
+    `;
+    }
+
+    function renderizarListado(titulo, recetas) {
+        if (recetas.length === 0) {
+            contenidoPlatos.innerHTML = `
+        <h3 class="mb-4">${titulo}</h3>
+        <p class="text-muted">No se encontraron recetas en esta categoría.</p>
+      `;
+            return;
+        }
+
+        let html = `<h3 class="mb-4">${titulo}</h3>`;
+
+        recetas.forEach((receta) => {
+            const esFav = window.Favoritos && window.Favoritos.esFavorito(receta.id);
+            html += `
+        <div class="card mb-3 shadow-sm receta-card position-relative"
+             data-id="${receta.id}"
              style="cursor:pointer;">
 
-            <div class="row g-0 align-items-center">
+          <button type="button"
+                  class="btn btn-favorito position-absolute top-0 end-0 m-2"
+                  data-id="${receta.id}"
+                  title="Guardar en favoritos">
+              <span class="icono-favorito">${esFav ? "❤️" : "🤍"}</span>
+          </button>
 
-                <div class="col-md-8">
+          <div class="row g-0 align-items-center">
 
-                    <div class="card-body">
-
-                        <h4 class="card-title">${receta.titulo}</h4>
-
-                        <p class="card-text">
-                            ${receta.descripcion}
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <div class="col-md-4">
-
-                    <img
-                        src="${receta.imagen}"
-                        class="img-fluid rounded-end w-100"
-                        style="height:220px;object-fit:cover;"
-                        alt="${receta.titulo}">
-
-                </div>
-
+            <div class="col-md-8">
+              <div class="card-body">
+                <h4 class="card-title">${receta.nombre}</h4>
+              </div>
             </div>
 
-        </div>
-        `;
+            <div class="col-md-4">
+              <img
+                src="${receta.imagen}"
+                class="img-fluid rounded-end w-100"
+                style="height:220px;object-fit:cover;"
+                alt="${receta.nombre}">
+            </div>
 
+          </div>
+        </div>
+      `;
+        });
+
+        contenidoPlatos.innerHTML = html;
+
+        document.querySelectorAll(".receta-card").forEach((card) => {
+            card.addEventListener("click", () => abrirModalReceta(card.dataset.id));
+        });
+
+        document.querySelectorAll(".btn-favorito").forEach((boton) => {
+            boton.addEventListener("click", (evento) => {
+                evento.stopPropagation(); // no abrir el modal de la receta
+                manejarClickFavorito(boton.dataset.id, boton.querySelector(".icono-favorito"));
+            });
+        });
+    }
+
+    // ---------- Favoritos ----------
+
+    // Un solo lugar que decide qué pasa al tocar el corazón, ya sea en una
+    // tarjeta o en el modal: si no hay sesión, pide iniciar sesión; si hay,
+    // delega el guardado (memoria + servidor con debounce) a auth.js.
+    function manejarClickFavorito(idMeal, iconoEl) {
+        if (!window.Favoritos || !window.Favoritos.estaLogueado()) {
+            const modalLogin = bootstrap.Modal.getOrCreateInstance(
+                document.getElementById("authModal")
+            );
+            modalLogin.show();
+            return;
+        }
+
+        const esFavAhora = window.Favoritos.toggle(idMeal);
+        if (iconoEl) iconoEl.textContent = esFavAhora ? "❤️" : "🤍";
+    }
+
+    // Cuando auth.js avisa que la lista de favoritos cambió (login, logout,
+    // carga desde servidor), se repintan todos los corazones visibles.
+    document.addEventListener("favoritos:actualizados", () => {
+        if (!window.Favoritos) return;
+
+        document.querySelectorAll(".btn-favorito .icono-favorito").forEach((icono) => {
+            const idMeal = icono.closest(".btn-favorito").dataset.id;
+            icono.textContent = window.Favoritos.esFavorito(idMeal) ? "❤️" : "🤍";
+        });
+
+        const iconoModal = document.getElementById("modalFavoritoIcono");
+        const idAbierto = document.getElementById("modalFavoritoBtn")?.dataset.id;
+        if (iconoModal && idAbierto) {
+            iconoModal.textContent = window.Favoritos.esFavorito(idAbierto) ? "❤️" : "🤍";
+        }
     });
 
-    document.querySelectorAll(".receta-card").forEach(card => {
+    async function abrirModalReceta(idMeal) {
+        document.getElementById("modalTitulo").innerText = "Cargando...";
+        document.getElementById("modalImagen").src = "";
+        document.getElementById("modalDescripcion").innerText = "";
+        document.getElementById("modalIngredientes").innerHTML = "";
 
-        card.addEventListener("click", () => {
+        const modalFavoritoBtn = document.getElementById("modalFavoritoBtn");
+        const modalFavoritoIcono = document.getElementById("modalFavoritoIcono");
+        modalFavoritoBtn.dataset.id = idMeal;
+        modalFavoritoIcono.textContent =
+            window.Favoritos && window.Favoritos.esFavorito(idMeal) ? "❤️" : "🤍";
+        modalFavoritoBtn.onclick = () => manejarClickFavorito(idMeal, modalFavoritoIcono);
 
-            const receta = recetas[card.dataset.index];
+        const modal = bootstrap.Modal.getOrCreateInstance(
+            document.getElementById("modalReceta")
+        );
+        modal.show();
 
-            document.getElementById("modalTitulo").innerText = receta.titulo;
+        try {
+            const detalle = await obtenerDetalleReceta(idMeal);
 
-            document.getElementById("modalImagen").src = receta.imagen;
+            if (!detalle) {
+                document.getElementById("modalTitulo").innerText = "Receta no encontrada";
+                return;
+            }
 
-            document.getElementById("modalDescripcion").innerText = receta.descripcion;
+            document.getElementById("modalTitulo").innerText = detalle.titulo;
+            document.getElementById("modalImagen").src = detalle.imagen;
+            document.getElementById("modalDescripcion").innerText = detalle.descripcion;
 
             const lista = document.getElementById("modalIngredientes");
-
             lista.innerHTML = "";
 
-            receta.ingredientes.forEach(ingrediente => {
-
+            detalle.ingredientes.forEach((ingrediente) => {
                 lista.innerHTML += `
-                    <li class="list-group-item d-flex align-items-center">
-
-                        <img
-                            src="${ingrediente.imagen}"
-                            width="60"
-                            height="60"
-                            class="rounded me-3"
-                            style="object-fit:cover;">
-
-                        <strong>${ingrediente.nombre}</strong>
-
-                    </li>
-                `;
-
+          <li class="list-group-item d-flex align-items-center">
+            <img
+              src="${ingrediente.imagen}"
+              width="60"
+              height="60"
+              class="rounded me-3"
+              style="object-fit:cover;"
+              onerror="this.style.display='none'">
+            <strong>${ingrediente.nombre}</strong>
+          </li>
+        `;
             });
+        } catch (error) {
+            document.getElementById("modalTitulo").innerText = "Error al cargar la receta";
+            console.error(error);
+        }
+    }
 
-            const modal = new bootstrap.Modal(
-                document.getElementById("modalReceta")
+    // ---------- Carga por categoría (botón individual) ----------
+
+    async function cargarCategoria(idBoton) {
+        const config = MAPA_CATEGORIAS[idBoton];
+        if (!config) return;
+
+        mostrarCargando(config.titulo);
+
+        try {
+          
+            const listas = await Promise.all(
+                config.mealdb.map((nombre) => obtenerListaPorCategoria(nombre))
+            );
+            const recetas = listas.flat();
+
+            renderizarListado(config.titulo, recetas);
+        } catch (error) {
+            mostrarError(config.titulo, "No se pudieron cargar las recetas. Intenta nuevamente.");
+            console.error(error);
+        }
+    }
+
+    // ---------- Carga de "Todos los platillos" ----------
+
+    async function cargarTodo() {
+        mostrarCargando("Todos los platillos");
+
+        try {
+            const nombresUnicos = [
+                ...new Set(Object.values(MAPA_CATEGORIAS).flatMap((c) => c.mealdb)),
+            ];
+
+            const listas = await Promise.all(
+                nombresUnicos.map((nombre) => obtenerListaPorCategoria(nombre))
             );
 
-            modal.show();
+            const recetas = listas.flatMap((lista) =>
+                lista.slice(0, LIMITE_POR_CATEGORIA_EN_TODO)
+            );
 
-        });
-
-    });
-
-});
-
-const categorias = {
-    "categoria-todo": {
-        titulo: "Todos los platillos",
-        recetas: recetas
-    },
-
-    "categoria-carne": {
-        titulo: "Platos con carne",
-        recetas: [
-            recetas[0]
-        ]
-    },
-
-    "categoria-pollo": {
-        titulo: "Platos con pollo",
-        recetas: [
-            recetas[1]
-        ]
-    },
-
-    "categoria-postres": {
-        titulo: "Postres",
-        recetas: [
-            recetas[2]
-        ]
-    },
-
-    "categoria-pasta": {
-        titulo: "Pasta / Fideos",
-        recetas: [
-            {
-                titulo: "Spaghetti a la Boloñesa",
-                descripcion: "Pasta acompañada de una deliciosa salsa boloñesa.",
-                imagen: "assets/spaghetti.jpg",
-                ingredientes: [
-                    { nombre: "Spaghetti", imagen: "assets/ingredientes/spaghetti.jpg" },
-                    { nombre: "Carne molida", imagen: "assets/ingredientes/carne.jpg" },
-                    { nombre: "Salsa de tomate", imagen: "assets/ingredientes/salsa.jpg" }
-                ]
-            }
-        ]
-    },
-
-    "categoria-tarta": {
-        titulo: "Tartas y Empanadas",
-        recetas: [
-            {
-                titulo: "Empanada de Carne",
-                descripcion: "Empanada rellena de carne sazonada y horneada.",
-                imagen: "assets/empanada.jpg",
-                ingredientes: [
-                    { nombre: "Masa", imagen: "assets/ingredientes/masa.jpg" },
-                    { nombre: "Carne", imagen: "assets/ingredientes/carne.jpg" },
-                    { nombre: "Cebolla", imagen: "assets/ingredientes/cebolla.jpg" }
-                ]
-            }
-        ]
-    },
-
-    "categoria-mariscos": {
-        titulo: "Mariscos y Pescados",
-        recetas: [
-            {
-                titulo: "Ceviche",
-                descripcion: "Pescado fresco marinado con limón y acompañado de camote.",
-                imagen: "assets/ceviche.jpg",
-                ingredientes: [
-                    { nombre: "Pescado", imagen: "assets/ingredientes/pescado.jpg" },
-                    { nombre: "Limón", imagen: "assets/ingredientes/limon.jpg" },
-                    { nombre: "Cebolla", imagen: "assets/ingredientes/cebolla.jpg" }
-                ]
-            }
-        ]
-    },
-
-    "categoria-entradas": {
-        titulo: "Entradas",
-        recetas: [
-            {
-                titulo: "Papa a la Huancaína",
-                descripcion: "Papas cocidas bañadas en salsa de ají amarillo y queso.",
-                imagen: "assets/huancaina.jpg",
-                ingredientes: [
-                    { nombre: "Papa", imagen: "assets/ingredientes/papa.jpg" },
-                    { nombre: "Queso", imagen: "assets/ingredientes/queso.jpg" },
-                    { nombre: "Ají amarillo", imagen: "assets/ingredientes/aji.jpg" }
-                ]
-            }
-        ]
-    },
-
-    "categoria-desayunos": {
-        titulo: "Desayunos",
-        recetas: [
-            {
-                titulo: "Panqueques",
-                descripcion: "Panqueques esponjosos acompañados con miel.",
-                imagen: "assets/panqueques.jpg",
-                ingredientes: [
-                    { nombre: "Harina", imagen: "assets/ingredientes/harina.jpg" },
-                    { nombre: "Leche", imagen: "assets/ingredientes/leche.jpg" },
-                    { nombre: "Huevo", imagen: "assets/ingredientes/huevo.jpg" }
-                ]
-            }
-        ]
-    },
-
-    "categoria-vegana": {
-        titulo: "Comida Vegana",
-        recetas: [
-            {
-                titulo: "Ensalada Vegana",
-                descripcion: "Ensalada fresca con vegetales y palta.",
-                imagen: "assets/vegana.jpg",
-                ingredientes: [
-                    { nombre: "Lechuga", imagen: "assets/ingredientes/lechuga.jpg" },
-                    { nombre: "Tomate", imagen: "assets/ingredientes/tomate.jpg" },
-                    { nombre: "Palta", imagen: "assets/ingredientes/palta.jpg" }
-                ]
-            }
-        ]
-    },
-
-    "categoria-vegetariana": {
-        titulo: "Comida Vegetariana",
-        recetas: [
-            {
-                titulo: "Tortilla de Verduras",
-                descripcion: "Tortilla preparada con verduras frescas.",
-                imagen: "assets/tortilla.jpg",
-                ingredientes: [
-                    { nombre: "Huevo", imagen: "assets/ingredientes/huevo.jpg" },
-                    { nombre: "Espinaca", imagen: "assets/ingredientes/espinaca.jpg" },
-                    { nombre: "Zanahoria", imagen: "assets/ingredientes/zanahoria.jpg" }
-                ]
-            }
-        ]
-    },
-
-    "categoria-mas": {
-        titulo: "Más recetas",
-        recetas: [
-            {
-                titulo: "Pizza Casera",
-                descripcion: "Pizza preparada con masa artesanal y queso mozzarella.",
-                imagen: "assets/pizza.jpg",
-                ingredientes: [
-                    { nombre: "Harina", imagen: "assets/ingredientes/harina.jpg" },
-                    { nombre: "Queso", imagen: "assets/ingredientes/queso.jpg" },
-                    { nombre: "Tomate", imagen: "assets/ingredientes/tomate.jpg" }
-                ]
-            }
-        ]
+            renderizarListado("Todos los platillos", recetas);
+        } catch (error) {
+            mostrarError("Todos los platillos", "No se pudieron cargar las recetas. Intenta nuevamente.");
+            console.error(error);
+        }
     }
-};
 
-Object.keys(categorias).forEach(id => {
+    // ---------- Inicialización ----------
 
-    document.getElementById(id).addEventListener("click", () => {
+    if (categoriaTodo) {
+        categoriaTodo.addEventListener("click", cargarTodo);
+    }
 
-        const categoria = categorias[id];
-
-        contenidoPlatos.innerHTML = `<h3 class="mb-4">${categoria.titulo}</h3>`;
-
-        categoria.recetas.forEach((receta, index) => {
-
-            contenidoPlatos.innerHTML += `
-                <div class="card mb-3 shadow-sm receta-card"
-                     data-index="${index}"
-                     style="cursor:pointer;">
-
-                    <div class="row g-0 align-items-center">
-
-                        <div class="col-md-8">
-                            <div class="card-body">
-                                <h4>${receta.titulo}</h4>
-                                <p>${receta.descripcion}</p>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <img src="${receta.imagen}"
-                                 class="img-fluid rounded-end w-100"
-                                 style="height:220px;object-fit:cover;">
-                        </div>
-
-                    </div>
-                </div>
-            `;
-        });
-
-        document.querySelectorAll(".receta-card").forEach(card => {
-
-            card.addEventListener("click", () => {
-
-                const receta = categoria.recetas[card.dataset.index];
-
-                document.getElementById("modalTitulo").innerText = receta.titulo;
-                document.getElementById("modalImagen").src = receta.imagen;
-                document.getElementById("modalDescripcion").innerText = receta.descripcion;
-
-                const lista = document.getElementById("modalIngredientes");
-                lista.innerHTML = "";
-
-                receta.ingredientes.forEach(ingrediente => {
-
-                    lista.innerHTML += `
-                        <li class="list-group-item d-flex align-items-center">
-                            <img src="${ingrediente.imagen}"
-                                 width="60"
-                                 height="60"
-                                 class="rounded me-3"
-                                 style="object-fit:cover;">
-                            <strong>${ingrediente.nombre}</strong>
-                        </li>
-                    `;
-
-                });
-
-                bootstrap.Modal.getOrCreateInstance(
-                    document.getElementById("modalReceta")
-                ).show();
-
-            });
-
-        });
-
+    Object.keys(MAPA_CATEGORIAS).forEach((idBoton) => {
+        const boton = document.getElementById(idBoton);
+        if (boton) {
+            boton.addEventListener("click", () => cargarCategoria(idBoton));
+        }
     });
-
-});
+})();

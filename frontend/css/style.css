@@ -255,3 +255,21 @@ h3{
 .hero-content p{
     font-size: 1.3rem;
 }
+/* ===== Botón de favorito (corazón) en tarjetas y modal ===== */
+.btn-favorito{
+    background: rgba(255, 255, 255, 0.85);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0;
+}
+
+.btn-favorito:hover{
+    background: rgba(255, 255, 255, 1);
+}
