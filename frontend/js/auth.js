@@ -219,7 +219,9 @@ document.addEventListener("DOMContentLoaded", () => {
             await registrar(email, password, nombre);
             // /auth/register ya deja al usuario logueado
             favoritos = [];
+            localStorage.setItem("favoritos_cache", JSON.stringify(favoritos));
             actualizarUISesion();
+            avisarFavoritosActualizados();
             bootstrap.Modal.getInstance(document.getElementById("authModal"))?.hide();
             registerForm.reset();
         } catch (err) {

@@ -145,7 +145,15 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="menu">
-                    <input type="text" class="form-control w-75 ms-auto" placeholder="Buscar receta..." aria-label="Buscar receta...">
+                    <form id="buscarForm" class="d-flex w-75 ms-auto" role="search">
+                        <input
+                            type="search"
+                            id="buscarInput"
+                            class="form-control"
+                            placeholder="Buscar receta... (ej: chicken, pasta, cake)"
+                            aria-label="Buscar receta...">
+                        <button type="submit" class="btn btn-buscar ms-2" aria-label="Buscar">🔍</button>
+                    </form>
 
                     <!-- Botón de login: visible cuando NO hay sesión iniciada -->
                     <button id="loginNavBtn" type="button" class="btn btn-sm btn-login-nav ms-3 w-25" data-bs-toggle="modal" data-bs-target="#authModal">
@@ -176,6 +184,7 @@
         <div class="row m-4">
             <div class="col-lg-3">
                 <h3>Categorías</h3>
+                <div class="btn w-100 btn-favoritos-nav" id="categoria-favoritos">♥ Mis Favoritos</div>
                 <div class="btn w-100" id="categoria-todo">Todos los platillos</div>
                 <div class="btn w-100" id="categoria-carne">Platos con carne</div>
                 <div class="btn w-100" id="categoria-pollo">Platos con pollo</div>
@@ -189,9 +198,7 @@
                 <div class="btn w-100" id="categoria-vegetariana">Comida vegetariana</div>
                 <div class="btn w-100" id="categoria-mas">Mas recetas</div>
             </div>
-            <div class="col-lg-9" id="contenido-platos">
-                <h3 id="nombre-categoria"></h3>
-            </div>
+            <div class="col-lg-9" id="contenido-platos"></div>
         </div>
     </main>
 
@@ -251,19 +258,29 @@
             <div class="modal-header">
                 <h4 id="modalTitulo" class="modal-title"></h4>
 
-                <button
-                    type="button"
-                    id="modalFavoritoBtn"
-                    class="btn btn-favorito me-2"
-                    title="Guardar en favoritos">
-                    <span id="modalFavoritoIcono">🤍</span>
-                </button>
+                <div class="d-flex align-items-center">
+                    <button
+                        type="button"
+                        id="modalTraducirBtn"
+                        class="btn btn-traducir me-2"
+                        title="Traducir al español">
+                        🌐 Traducir
+                    </button>
 
-                <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="modal">
-                </button>
+                    <button
+                        type="button"
+                        id="modalFavoritoBtn"
+                        class="btn btn-favorito me-2"
+                        title="Guardar en favoritos">
+                        <span id="modalFavoritoIcono">🤍</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                    </button>
+                </div>
             </div>
 
             <div class="modal-body">
