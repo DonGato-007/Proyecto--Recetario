@@ -133,21 +133,14 @@
 
         let html = `<h3 class="mb-4">${titulo}</h3>`;
 
-        recetas.forEach((receta) => {
-            const esFav = window.Favoritos && window.Favoritos.esFavorito(receta.id);
-            html += `
-        <div class="card mb-3 shadow-sm receta-card position-relative"
-             data-id="${receta.id}"
+    recetas.forEach((receta, index) => {
+
+        contenidoPlatos.innerHTML += `
+        <div class="card mb-3 shadow-sm receta-card"
+             data-index="${index}"
              style="cursor:pointer;">
 
-          <button type="button"
-                  class="btn btn-favorito position-absolute top-0 end-0 m-2"
-                  data-id="${receta.id}"
-                  title="Guardar en favoritos">
-              <span class="icono-favorito">${esFav ? "❤️" : "🤍"}</span>
-          </button>
-
-          <div class="row g-0 align-items-center">
+            <div class="row g-0 align-items-center">
 
             <div class="col-md-8">
               <div class="card-body">
@@ -168,84 +161,17 @@
       `;
         });
 
-        contenidoPlatos.innerHTML = html;
+    document.querySelectorAll(".receta-card").forEach(card => {
 
-        document.querySelectorAll(".receta-card").forEach((card) => {
-            card.addEventListener("click", () => abrirModalReceta(card.dataset.id));
-        });
+        card.addEventListener("click", () => {
 
-        document.querySelectorAll(".btn-favorito").forEach((boton) => {
-            boton.addEventListener("click", (evento) => {
-                evento.stopPropagation(); // no abrir el modal de la receta
-                manejarClickFavorito(boton.dataset.id, boton.querySelector(".icono-favorito"));
-            });
-        });
-    }
+            const receta = recetas[card.dataset.index];
 
-    // ---------- Favoritos ----------
+            document.getElementById("modalTitulo").innerText = receta.titulo;
 
-    // Un solo lugar que decide qué pasa al tocar el corazón, ya sea en una
-    // tarjeta o en el modal: si no hay sesión, pide iniciar sesión; si hay,
-    // delega el guardado (memoria + servidor con debounce) a auth.js.
-    function manejarClickFavorito(idMeal, iconoEl) {
-        if (!window.Favoritos || !window.Favoritos.estaLogueado()) {
-            const modalLogin = bootstrap.Modal.getOrCreateInstance(
-                document.getElementById("authModal")
-            );
-            modalLogin.show();
-            return;
-        }
+            document.getElementById("modalImagen").src = receta.imagen;
 
-        const esFavAhora = window.Favoritos.toggle(idMeal);
-        if (iconoEl) iconoEl.textContent = esFavAhora ? "❤️" : "🤍";
-    }
-
-    // Cuando auth.js avisa que la lista de favoritos cambió (login, logout,
-    // carga desde servidor), se repintan todos los corazones visibles.
-    document.addEventListener("favoritos:actualizados", () => {
-        if (!window.Favoritos) return;
-
-        document.querySelectorAll(".btn-favorito .icono-favorito").forEach((icono) => {
-            const idMeal = icono.closest(".btn-favorito").dataset.id;
-            icono.textContent = window.Favoritos.esFavorito(idMeal) ? "❤️" : "🤍";
-        });
-
-        const iconoModal = document.getElementById("modalFavoritoIcono");
-        const idAbierto = document.getElementById("modalFavoritoBtn")?.dataset.id;
-        if (iconoModal && idAbierto) {
-            iconoModal.textContent = window.Favoritos.esFavorito(idAbierto) ? "❤️" : "🤍";
-        }
-    });
-
-    async function abrirModalReceta(idMeal) {
-        document.getElementById("modalTitulo").innerText = "Cargando...";
-        document.getElementById("modalImagen").src = "";
-        document.getElementById("modalDescripcion").innerText = "";
-        document.getElementById("modalIngredientes").innerHTML = "";
-
-        const modalFavoritoBtn = document.getElementById("modalFavoritoBtn");
-        const modalFavoritoIcono = document.getElementById("modalFavoritoIcono");
-        modalFavoritoBtn.dataset.id = idMeal;
-        modalFavoritoIcono.textContent =
-            window.Favoritos && window.Favoritos.esFavorito(idMeal) ? "❤️" : "🤍";
-        modalFavoritoBtn.onclick = () => manejarClickFavorito(idMeal, modalFavoritoIcono);
-
-        const modal = bootstrap.Modal.getOrCreateInstance(
-            document.getElementById("modalReceta")
-        );
-        modal.show();
-
-        try {
-            const detalle = await obtenerDetalleReceta(idMeal);
-
-            if (!detalle) {
-                document.getElementById("modalTitulo").innerText = "Receta no encontrada";
-                return;
-            }
-
-            document.getElementById("modalTitulo").innerText = detalle.titulo;
-            document.getElementById("modalImagen").src = detalle.imagen;
-            document.getElementById("modalDescripcion").innerText = detalle.descripcion;
+            document.getElementById("modalDescripcion").innerText = receta.descripcion;
 
             const lista = document.getElementById("modalIngredientes");
             lista.innerHTML = "";
