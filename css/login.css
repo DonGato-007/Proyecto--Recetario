@@ -1,7 +1,3 @@
-/* ================= LOGIN / MODAL DE AUTENTICACIÓN ================= */
-
-/* Contenido del modal de Bootstrap: quitamos su fondo/borde por defecto
-   para que la tarjeta de login se vea igual que antes (misma paleta). */
 .auth-modal-content{
     background: transparent;
     border: none;
@@ -95,8 +91,6 @@
     background:#6D4C41;
 
 }
-
-/* Pestañas Iniciar sesión / Crear cuenta dentro del modal */
 .auth-tabs{
     border-bottom: 2px solid #E8D8C3;
     justify-content: center;
@@ -122,9 +116,6 @@
     background: transparent;
     border-bottom: 2px solid #B08A63;
 }
-
-/* Botón "Iniciar sesión" del navbar: mismo tamaño que .btn-sm (como
-   "Cerrar sesión"), solo cambia el color para diferenciarlo. */
 .btn-login-nav{
     border: none;
     background: #B08A63;
@@ -138,11 +129,6 @@
     background: #6D4C41;
     color: white;
 }
-
-/* !important es necesario: sin esto, clases de Bootstrap como
-   ".d-flex" (que también traen !important) ganan la pelea de
-   especificidad y el elemento se sigue mostrando aunque tenga
-   la clase "oculto". */
 .oculto{
 
     display:none !important;

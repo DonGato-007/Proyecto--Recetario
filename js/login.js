@@ -1,14 +1,6 @@
-// frontend/js/login.js
-// Núcleo del módulo de Autenticación (/auth/*) definido en CONTRATO_API.md:
-// maneja el estado de sesión (localStorage), el login y el logout.
-//
-// Expone `window.RecetarioAuth` con lo que necesita frontend/js/auth.js
-// (el registro de usuarios) para no duplicar la lógica de sesión.
-
 (() => {
   const API_BASE_URL = "https://apigeneral-ehtt.onrender.com";
 
-  // Claves usadas en localStorage para persistir la sesión en el navegador.
   const STORAGE_KEYS = {
     token: "recetario_token",
     usuarioId: "recetario_usuario_id",
@@ -16,7 +8,6 @@
     nombre: "recetario_nombre",
   };
 
-  // Elementos del DOM
   const authModalEl = document.getElementById("authModal");
   const loginForm = document.getElementById("loginForm");
   const emailInput = document.getElementById("loginEmail");
@@ -28,8 +19,6 @@
   const userInfo = document.getElementById("userInfo");
   const userNombre = document.getElementById("userNombre");
   const logoutBtn = document.getElementById("logoutBtn");
-
-  // ---------- Manejo de sesión en localStorage ----------
 
   function guardarSesion(datos) {
     localStorage.setItem(STORAGE_KEYS.token, datos.token);
@@ -46,10 +35,6 @@
     Object.values(STORAGE_KEYS).forEach((clave) => localStorage.removeItem(clave));
   }
 
-  // ---------- UI ----------
-
-  // La app funciona en modo invitado: por defecto se ve el botón
-  // "Iniciar sesión" en el navbar y el modal permanece cerrado.
   function mostrarInvitado() {
     if (loginNavBtn) loginNavBtn.classList.remove("oculto");
     if (userInfo) userInfo.classList.add("oculto");
@@ -87,8 +72,6 @@
     loginBtn.textContent = cargando ? "Ingresando..." : "Iniciar sesión";
   }
 
-  // ---------- Llamadas al API (según CONTRATO_API.md → Módulo de Autenticación) ----------
-
   async function loginRequest(email, password) {
     const respuesta = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",
@@ -100,15 +83,14 @@
     try {
       datos = await respuesta.json();
     } catch (_) {
-      // Respuesta sin cuerpo JSON válido
+
     }
 
     if (!respuesta.ok) {
-      // 400: falta email/password | 401: credenciales inválidas
       throw new Error(datos.error || "No se pudo iniciar sesión. Intenta nuevamente.");
     }
 
-    return datos; // { usuario_id, email, nombre, token }
+    return datos;
   }
 
   async function meRequest(token) {
@@ -121,10 +103,8 @@
       throw new Error("Sesión inválida o expirada");
     }
 
-    return respuesta.json(); // { usuario_id, email, nombre }
+    return respuesta.json();
   }
-
-  // ---------- Flujo principal ----------
 
   async function verificarSesionAlCargar() {
     const token = obtenerToken();
@@ -136,12 +116,10 @@
 
     try {
       const datos = await meRequest(token);
-      // Refrescamos los datos guardados por si cambiaron en el servidor
       localStorage.setItem(STORAGE_KEYS.email, datos.email || "");
       localStorage.setItem(STORAGE_KEYS.nombre, datos.nombre || "");
       mostrarUsuarioLogueado(datos.nombre, datos.email);
     } catch (error) {
-      // Token faltante, inválido o expirado -> se limpia y se vuelve a modo invitado
       limpiarSesion();
       mostrarInvitado();
     }
@@ -181,8 +159,6 @@
     mostrarInvitado();
   }
 
-  // ---------- Inicialización ----------
-
   if (loginForm) {
     loginForm.addEventListener("submit", manejarSubmitLogin);
   }
@@ -190,13 +166,7 @@
   if (logoutBtn) {
     logoutBtn.addEventListener("click", manejarLogout);
   }
-
-  // El script se carga al final del <body>, así que el DOM ya existe.
   verificarSesionAlCargar();
-
-  // ---------- API compartida con frontend/js/auth.js (registro) ----------
-  // Se reutiliza toda la lógica de sesión para no duplicar código entre
-  // login y registro, ya que ambos pertenecen al mismo módulo de Autenticación.
   window.RecetarioAuth = {
     API_BASE_URL,
     STORAGE_KEYS,

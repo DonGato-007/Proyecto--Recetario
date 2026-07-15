@@ -4,10 +4,8 @@
     const buscarInput = document.getElementById("buscarInput");
 
     const API_BASE = "https://www.themealdb.com/api/json/v1/1";
-    // MyMemory: API gratuita de traducción, sin API key, pensada para textos cortos/medianos.
     const API_TRADUCCION = "https://api.mymemory.translated.net/get";
 
-    // ---------- Mapeo: botón local -> categorías de TheMealDB ----------
     const MAPA_CATEGORIAS = {
         "categoria-carne": { titulo: "Platos con carne", mealdb: ["Beef"] },
         "categoria-pollo": { titulo: "Platos con pollo", mealdb: ["Chicken"] },
@@ -24,18 +22,11 @@
 
     const LIMITE_POR_CATEGORIA_EN_TODO = 4;
 
-    // ---------- Caché en memoria (dura mientras la pestaña esté abierta) ----------
     const cacheListasPorCategoria = new Map();
     const cacheDetallePorId = new Map();
 
-    // Qué se está mostrando ahora mismo, para saber cómo reaccionar cuando
-    // cambian los favoritos o para resaltar el botón activo del sidebar.
     let vistaActual = { tipo: "categoria", valor: "categoria-todo" };
 
-    // ---------- Utilidades ----------
-
-    // Evita duplicados cuando una misma receta aparece en más de una
-    // categoría al fusionar varias listas (pasaba en "Todos" y "Más recetas").
     function quitarDuplicados(recetas) {
         const vistos = new Map();
         recetas.forEach((r) => vistos.set(r.id, r));
@@ -79,8 +70,6 @@
         };
     }
 
-    // ---------- Llamadas a TheMealDB ----------
-
     async function obtenerListaPorCategoria(nombreMealdb) {
         if (cacheListasPorCategoria.has(nombreMealdb)) {
             return cacheListasPorCategoria.get(nombreMealdb);
@@ -120,8 +109,6 @@
         const datos = await respuesta.json();
         const meals = datos.meals || [];
 
-        // search.php ya trae el detalle completo: lo guardamos en caché de
-        // una vez para que abrir el modal después sea instantáneo.
         meals.forEach((meal) => {
             if (!cacheDetallePorId.has(meal.idMeal)) {
                 cacheDetallePorId.set(meal.idMeal, detalleDesdeMeal(meal));
@@ -131,10 +118,6 @@
         return meals.map(mapearMeal);
     }
 
-    // ---------- Traducción (MyMemory, gratuita, sin API key) ----------
-
-    // Corta un texto largo en trozos que respeten oraciones completas, porque
-    // la API gratuita de MyMemory limita el tamaño de cada consulta.
     function partirEnTrozos(texto, maxLargo = 450) {
         const oraciones = texto.split(/(?<=[.!?])\s+/);
         const trozos = [];
@@ -167,11 +150,8 @@
         return traducidos.join(" ");
     }
 
-    // Traduce título, ingredientes e instrucciones de una receta y cachea
-    // el resultado dentro del propio objeto "detalle" para no volver a
-    // llamar la API si el usuario alterna entre inglés/español otra vez.
     async function traducirReceta(detalle) {
-        if (detalle.tituloEs) return detalle; // ya traducida antes
+        if (detalle.tituloEs) return detalle;
 
         const [tituloEs, descripcionEs, ingredientesEs] = await Promise.all([
             traducirTexto(detalle.titulo),
@@ -184,8 +164,6 @@
         detalle.ingredientesEs = ingredientesEs;
         return detalle;
     }
-
-    // ---------- Render de listados ----------
 
     function marcarBotonActivo(idBoton) {
         document.querySelectorAll(".col-lg-3 .btn").forEach((btn) => btn.classList.remove("activa"));
@@ -261,13 +239,11 @@
 
         document.querySelectorAll(".btn-favorito").forEach((boton) => {
             boton.addEventListener("click", (evento) => {
-                evento.stopPropagation(); // que no abra el modal de la receta
+                evento.stopPropagation();
                 manejarClickFavorito(boton.dataset.id, boton.querySelector(".icono-favorito"));
             });
         });
     }
-
-    // ---------- Favoritos ----------
 
     function manejarClickFavorito(idMeal, iconoEl) {
         if (!window.Favoritos || !window.Favoritos.estaLogueado()) {
@@ -278,8 +254,6 @@
         const esFavAhora = window.Favoritos.toggle(idMeal);
         if (iconoEl) iconoEl.textContent = esFavAhora ? "❤️" : "🤍";
 
-        // Si estamos parados en la página de favoritos y se quita una receta,
-        // lo más correcto es que desaparezca de la lista al toque.
         if (vistaActual.tipo === "favoritos" && !esFavAhora) {
             cargarFavoritos();
         }
@@ -319,8 +293,6 @@
         }
     }
 
-    // Cuando auth.js avisa que la lista de favoritos cambió (login, logout,
-    // carga desde servidor), se refresca lo que corresponda según la vista.
     document.addEventListener("favoritos:actualizados", () => {
         if (!window.Favoritos) return;
 
@@ -340,8 +312,6 @@
             iconoModal.textContent = window.Favoritos.esFavorito(idModalAbierto) ? "❤️" : "🤍";
         }
     });
-
-    // ---------- Modal de detalle + traducción ----------
 
     function pintarDetalleModal(detalle, enEspanol) {
         document.getElementById("modalTitulo").innerText = enEspanol ? detalle.tituloEs : detalle.titulo;
@@ -426,8 +396,6 @@
         }
     }
 
-    // ---------- Carga por categoría (botón individual) ----------
-
     async function cargarCategoria(idBoton) {
         const config = MAPA_CATEGORIAS[idBoton];
         if (!config) return;
@@ -445,8 +413,6 @@
             console.error(error);
         }
     }
-
-    // ---------- Carga de "Todos los platillos" ----------
 
     async function cargarTodo() {
         vistaActual = { tipo: "categoria", valor: "categoria-todo" };
@@ -466,8 +432,6 @@
         }
     }
 
-    // ---------- Búsqueda ----------
-
     async function realizarBusqueda(texto) {
         const consulta = texto.trim();
         if (!consulta) {
@@ -476,7 +440,7 @@
         }
 
         vistaActual = { tipo: "busqueda", valor: consulta };
-        marcarBotonActivo(null); // ninguna categoría queda "activa" durante una búsqueda
+        marcarBotonActivo(null);
         mostrarCargando(`Resultados para "${consulta}"`);
 
         try {
@@ -487,7 +451,6 @@
             console.error(error);
         }
 
-        // En móvil, cierra el menú colapsable tras buscar para ver los resultados.
         const menu = document.getElementById("menu");
         if (menu && menu.classList.contains("show")) {
             bootstrap.Collapse.getOrCreateInstance(menu).hide();
@@ -499,7 +462,7 @@
         buscarInput.addEventListener("input", () => {
             if (timerBusqueda) clearTimeout(timerBusqueda);
             const valor = buscarInput.value;
-            timerBusqueda = setTimeout(() => realizarBusqueda(valor), 450); // debounce mientras escribe
+            timerBusqueda = setTimeout(() => realizarBusqueda(valor), 450);
         });
     }
     if (buscarForm) {
@@ -510,8 +473,6 @@
         });
     }
 
-    // ---------- Inicialización ----------
-
     document.getElementById("categoria-todo")?.addEventListener("click", cargarTodo);
     document.getElementById("categoria-favoritos")?.addEventListener("click", cargarFavoritos);
 
@@ -519,5 +480,5 @@
         document.getElementById(idBoton)?.addEventListener("click", () => cargarCategoria(idBoton));
     });
 
-    cargarTodo(); // vista inicial al entrar a la página
+    cargarTodo();
 })();
